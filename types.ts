@@ -1,5 +1,11 @@
+
 import type { ReactNode } from 'react';
-import type { PromptAnalysis } from './services/geminiService';
+
+export interface PromptAnalysis {
+    score: number;
+    justification: string;
+    suggestions: string[];
+}
 
 export interface SidebarItem {
   text: string;

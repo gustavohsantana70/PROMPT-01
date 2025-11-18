@@ -1,11 +1,12 @@
+
 import React, { useState, useEffect, useMemo, type ReactNode } from 'react';
-import { analyzeAndRefinePrompt, type PromptAnalysis } from '../services/geminiService';
-import type { SuperPrompt } from '../types';
+import { analyzeAndRefinePrompt } from '../services/geminiService';
+import type { SuperPrompt, PromptAnalysis } from '../types';
 import { MOCK_SUPER_PROMPTS } from '../constants';
 import { 
     SparkleIcon, ClipboardIcon, ClipboardCheckIcon, LightbulbIcon, CheckCircleIcon, 
     ChevronDownIcon, DescriptionIcon, WrenchScrewdriverIcon, ArrowDownTrayIcon,
-    EditIcon, DeleteIcon, EyeIcon
+    EditIcon, DeleteIcon
 } from './icons';
 
 

@@ -1,5 +1,6 @@
+
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import type { SchemaTable, PromptType, Competitor } from '../types';
+import type { SchemaTable, PromptType, Competitor, PromptAnalysis } from '../types';
 
 const schemaDefinition = {
     type: Type.OBJECT,
@@ -195,12 +196,6 @@ Sempre utilize formatação Markdown para estruturar o documento. Use cabeçalho
         throw new Error("Ocorreu um erro ao comunicar com o serviço de IA. Por favor, verifique sua conexão e tente novamente.");
     }
 };
-
-export interface PromptAnalysis {
-    score: number;
-    justification: string;
-    suggestions: string[];
-}
 
 const analysisSchema = {
     type: Type.OBJECT,
