@@ -5,33 +5,29 @@ import {
     DescriptionIcon, 
     SparkleIcon, 
     ArrowDownTrayIcon, 
-    CheckCircleIcon,
-    EditIcon,
-    LinkIcon,
-    XMarkIcon,
-    LightbulbIcon,
-    WidgetsIcon,
-    StorageIcon,
-    PaintBrushIcon,
-    PencilIcon
+    CheckCircleIcon, 
+    EditIcon, 
+    LinkIcon, 
+    XMarkIcon, 
+    LightbulbIcon, 
+    WidgetsIcon, 
+    StorageIcon, 
+    PaintBrushIcon, 
+    PencilIcon 
 } from './icons';
 
-// FIX: Added 'mermaid' to the global window object to avoid TypeScript errors.
 declare global {
     interface Window {
         mermaid: any;
     }
 }
 
-
 // Helper function to clean the AI's response
 const cleanPrdContent = (rawContent: string): string => {
     // Find the first occurrence of a markdown header (e.g., "#", "##") at the beginning of a line.
-    // Allow for zero or more spaces after the hash(es).
     const firstHeaderIndex = rawContent.search(/^#+\s*/m);
 
     if (firstHeaderIndex !== -1) {
-        // If a header is found, return the content from that point onwards
         return rawContent.substring(firstHeaderIndex);
     }
     
@@ -42,7 +38,6 @@ const cleanPrdContent = (rawContent: string): string => {
         return rawContent.substring(lineStartIndex);
     }
     
-    // If no clear header is found, return the original content as a fallback.
     return rawContent;
 };
 
@@ -132,21 +127,40 @@ const FlowchartComponent: React.FC<{
 }> = ({ content, isLoading, error, onRegenerate }) => {
     const [zoom, setZoom] = useState(1);
     const flowchartRef = React.useRef<HTMLDivElement>(null);
+    const [renderError, setRenderError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (content && flowchartRef.current) {
-            flowchartRef.current.removeAttribute('data-processed');
-            // FIX: Updated Mermaid initialization to use the `mermaidAPI` for rendering, which provides more control and avoids common race conditions with the simpler `mermaid.run()`.
-            window.mermaid.mermaidAPI.render(
-              'mermaid-graph',
-              content,
-              (svgCode: string) => {
-                if (flowchartRef.current) {
-                   flowchartRef.current.innerHTML = svgCode;
+        const renderChart = async () => {
+            if (content && flowchartRef.current && window.mermaid) {
+                setRenderError(null);
+                try {
+                    // Clear previous content to prevent duplication
+                    flowchartRef.current.innerHTML = '';
+
+                    // Initialize Mermaid configuration
+                    window.mermaid.initialize({ 
+                        startOnLoad: false,
+                        theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
+                        securityLevel: 'loose',
+                    });
+                    
+                    // Generate a unique ID for the graph
+                    const id = `mermaid-${Date.now()}`;
+                    
+                    // Render the chart asynchronously (Mermaid v10+)
+                    const { svg } = await window.mermaid.render(id, content);
+                    
+                    if (flowchartRef.current) {
+                        flowchartRef.current.innerHTML = svg;
+                    }
+                } catch (err) {
+                    console.error("Mermaid rendering error:", err);
+                    setRenderError("Não foi possível renderizar o fluxograma. A sintaxe gerada pode estar incorreta.");
                 }
-              }
-            );
-        }
+            }
+        };
+        
+        renderChart();
     }, [content]);
 
     if (isLoading) {
@@ -159,11 +173,11 @@ const FlowchartComponent: React.FC<{
         );
     }
 
-    if (error) {
+    if (error || renderError) {
         return (
             <div className="text-center py-16 bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
                 <h3 className="text-lg font-semibold text-red-700 dark:text-red-200">Erro ao gerar fluxograma</h3>
-                <p className="text-sm text-red-600 dark:text-red-300 mt-2">{error}</p>
+                <p className="text-sm text-red-600 dark:text-red-300 mt-2">{error || renderError}</p>
                 <button onClick={onRegenerate} className="mt-4 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Tentar Novamente</button>
             </div>
         );
@@ -235,9 +249,9 @@ const PRDResultView: React.FC<{
     isFetchingDbSchema, 
     dbSchemaError, 
     fetchDbSchema,
-    logoImages,
-    isFetchingLogoImages,
-    logoImagesError,
+    logoImages, 
+    isFetchingLogoImages, 
+    logoImagesError, 
     fetchLogoImages,
     prdDetails,
     isFetchingDetails,

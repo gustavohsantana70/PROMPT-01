@@ -6,7 +6,7 @@ import { SavedSchemasTable } from './components/SavedSchemasTable';
 import { MOCK_SCHEMAS, MOCK_DOCUMENTS, MOCK_USER } from './constants';
 import { generateDatabaseSchema } from './services/geminiService';
 import type { ChatMessage, SchemaTable, GeneratedPrompt, Document, User } from './types';
-import { AddIcon, PromptEngineIcon, MoonIcon, MailIcon, LockClosedIcon, GoogleIcon, SunIcon } from './components/icons';
+import { AddIcon, PromptEngineIcon, MailIcon, LockClosedIcon, GoogleIcon } from './components/icons';
 import { PromptGenerator } from './components/PromptGenerator';
 import { Dashboard } from './components/Dashboard';
 import { PRDGenerator } from './components/PRDGenerator';
