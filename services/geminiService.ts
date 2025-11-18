@@ -54,6 +54,9 @@ const getAiClient = () => {
     return new GoogleGenAI({ apiKey: process.env.API_KEY });
 };
 
+const cleanJsonResult = (text: string): string => {
+    return text.replace(/```json/g, '').replace(/```/g, '').trim();
+};
 
 export const generateDatabaseSchema = async (description: string): Promise<SchemaTable[]> => {
     try {
@@ -78,7 +81,7 @@ export const generateDatabaseSchema = async (description: string): Promise<Schem
             },
         });
 
-        const jsonText = response.text.trim();
+        const jsonText = cleanJsonResult(response.text || "{}");
         const parsedJson = JSON.parse(jsonText);
         
         if (parsedJson && Array.isArray(parsedJson.tables)) {
@@ -116,14 +119,14 @@ Your final output should be ONLY the generated prompt, ready to be copied and pa
 Please generate an optimized prompt for me.`;
         
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-pro",
+            model: "gemini-3-pro-preview",
             contents: userPrompt,
             config: {
                 systemInstruction: systemInstruction,
             },
         });
 
-        return response.text;
+        return response.text || "";
 
     } catch (error) {
         console.error("Error generating prompt:", error);
@@ -182,14 +185,14 @@ Sempre utilize formatação Markdown para estruturar o documento. Use cabeçalho
         `;
         
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-pro",
+            model: "gemini-3-pro-preview",
             contents: userPrompt,
             config: {
                 systemInstruction: systemInstruction,
             },
         });
 
-        return response.text;
+        return response.text || "";
 
     } catch (error) {
         console.error("Error generating PRD:", error);
@@ -240,7 +243,7 @@ ${promptToAnalyze}
 `;
         
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-pro",
+            model: "gemini-3-pro-preview",
             contents: userPrompt,
             config: {
                 systemInstruction: systemInstruction,
@@ -249,7 +252,7 @@ ${promptToAnalyze}
             },
         });
 
-        const jsonText = response.text.trim();
+        const jsonText = cleanJsonResult(response.text || "{}");
         const parsedJson = JSON.parse(jsonText);
         
         if (parsedJson && typeof parsedJson.score === 'number' && typeof parsedJson.justification === 'string' && Array.isArray(parsedJson.suggestions)) {
@@ -315,11 +318,14 @@ Structure your response as a single, complete prompt. Do not add any conversatio
         `;
 
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-pro",
+            model: "gemini-3-pro-preview",
             contents: userPrompt,
+            config: {
+                systemInstruction: systemInstruction,
+            },
         });
 
-        return response.text;
+        return response.text || "";
 
     } catch (error) {
         console.error("Error generating app prompt:", error);
@@ -332,14 +338,14 @@ export const chatWithAgent = async (systemInstruction: string, message: string):
         const ai = getAiClient();
         
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-pro",
+            model: "gemini-3-pro-preview",
             contents: message,
             config: {
                 systemInstruction: systemInstruction,
             },
         });
 
-        return response.text;
+        return response.text || "";
 
     } catch (error) {
         console.error("Error chatting with agent:", error);
@@ -396,7 +402,7 @@ export const generateCompetitorAnalysis = async (prdContent: string): Promise<Co
             },
         });
 
-        const jsonText = response.text.trim();
+        const jsonText = cleanJsonResult(response.text || "{}");
         const parsedJson = JSON.parse(jsonText);
 
         if (parsedJson && Array.isArray(parsedJson.competitors)) {
@@ -449,14 +455,14 @@ export const generateUIInterfaces = async (prdContent: string): Promise<string> 
         `;
 
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-pro",
+            model: "gemini-3-pro-preview",
             contents: userPrompt,
             config: {
                 systemInstruction,
             },
         });
 
-        return response.text;
+        return response.text || "";
 
     } catch (error) {
         console.error("Error generating UI interfaces:", error);
@@ -487,7 +493,7 @@ export const generateDbSchemaFromPrd = async (prdContent: string): Promise<Schem
             },
         });
 
-        const jsonText = response.text.trim();
+        const jsonText = cleanJsonResult(response.text || "{}");
         const parsedJson = JSON.parse(jsonText);
         
         if (parsedJson && Array.isArray(parsedJson.tables)) {
@@ -584,14 +590,14 @@ export const generatePrdDetails = async (prdContent: string): Promise<string> =>
         `;
 
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-pro",
+            model: "gemini-3-pro-preview",
             contents: userPrompt,
             config: {
                 systemInstruction,
             },
         });
 
-        return response.text;
+        return response.text || "";
 
     } catch (error) {
         console.error("Error generating PRD details:", error);
@@ -625,7 +631,7 @@ export const generateUiFlowchart = async (prdContent: string): Promise<string> =
         `;
 
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-pro",
+            model: "gemini-3-pro-preview",
             contents: userPrompt,
             config: {
                 systemInstruction,
@@ -633,7 +639,7 @@ export const generateUiFlowchart = async (prdContent: string): Promise<string> =
         });
 
         // Clean up the response to ensure it's just the Mermaid code
-        const mermaidCode = response.text.replace(/```mermaid/g, '').replace(/```/g, '').trim();
+        const mermaidCode = (response.text || "").replace(/```mermaid/g, '').replace(/```/g, '').trim();
         return mermaidCode;
 
     } catch (error) {
