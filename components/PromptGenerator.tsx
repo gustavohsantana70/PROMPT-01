@@ -3,7 +3,7 @@ import { generateAppPrompt } from '../services/geminiService';
 import type { GeneratedPrompt, PromptType, Document } from '../types';
 import { 
     SparkleIcon, ClipboardIcon, ClipboardCheckIcon, CodeIcon, GlobeAltIcon, 
-    CheckCircleIcon, ArrowDownTrayIcon, PromptEngineIcon
+    CheckCircleIcon, PromptEngineIcon
 } from './icons';
 
 const techFrameworks: Record<string, string[]> = {

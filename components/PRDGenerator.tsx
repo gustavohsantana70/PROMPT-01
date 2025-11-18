@@ -1,11 +1,9 @@
-import React, { useState, useEffect, type ReactNode, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { Document, Competitor, SchemaTable } from '../types';
 import { generatePRD, generateCompetitorAnalysis, generateUIInterfaces, generateDbSchemaFromPrd, generateLogoImages, generatePrdDetails, generateUiFlowchart } from '../services/geminiService';
 import { 
     DescriptionIcon, 
     SparkleIcon, 
-    ArrowDownTrayIcon, 
-    CheckCircleIcon, 
     EditIcon, 
     LinkIcon, 
     XMarkIcon, 

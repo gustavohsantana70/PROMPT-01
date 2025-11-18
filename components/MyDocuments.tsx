@@ -2,7 +2,7 @@ import React, { useState, useMemo, type ReactNode } from 'react';
 import type { Document, DocumentType } from '../types';
 import { 
     DescriptionIcon, ClipboardIcon, ClipboardCheckIcon, EyeIcon, XMarkIcon, DeleteIcon,
-    CodeIcon, Squares2X2Icon, Bars3Icon, ArrowsUpDownIcon
+    CodeIcon, Squares2X2Icon, Bars3Icon
 } from './icons';
 
 const ViewDocumentModal: React.FC<{ document: Document; onClose: () => void }> = ({ document, onClose }) => {
