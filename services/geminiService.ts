@@ -63,17 +63,17 @@ export const generateDatabaseSchema = async (description: string): Promise<Schem
         const ai = getAiClient();
 
         const prompt = `
-            Based on the following application description, generate a detailed SQL database schema.
-            The schema should be well-structured, follow best practices, and include tables, columns with appropriate data types, and brief descriptions for each table and column.
-            Ensure primary keys (like 'id') and foreign keys (like 'user_id') are included where relevant.
+            Com base na descrição da aplicação a seguir, gere um schema de banco de dados SQL detalhado.
+            O schema deve ser bem estruturado, seguir as melhores práticas e incluir tabelas, colunas com tipos de dados apropriados e descrições breves (em Português) para cada tabela e coluna.
+            Certifique-se de que chaves primárias (como 'id') e chaves estrangeiras (como 'user_id') sejam incluídas onde for relevante.
 
-            Application Description: "${description}"
+            Descrição da Aplicação: "${description}"
 
-            Please return the schema in the specified JSON format.
+            Por favor, retorne o schema no formato JSON especificado.
         `;
 
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3-pro-preview",
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
@@ -101,28 +101,29 @@ export const generatePrompt = async (description: string): Promise<string> => {
     try {
         const ai = getAiClient();
 
-        const systemInstruction = `You are a world-class Prompt Engineering expert. Your mission is to transform a user's simple idea into a comprehensive, professional-grade prompt suitable for advanced LLMs like Google Gemini.
+        const systemInstruction = `Você é um especialista em Engenharia de Prompt de classe mundial. Sua missão é transformar a ideia simples de um usuário em um prompt abrangente e de nível profissional, adequado para LLMs avançados como o Google Gemini.
 
-When you receive a user's goal, you must expand upon it to create a detailed and highly effective prompt. The generated prompt MUST be structured with the following Markdown sections:
+Quando você recebe o objetivo de um usuário, você deve expandi-lo para criar um prompt detalhado e altamente eficaz. O prompt gerado DEVE ser estruturado com as seguintes seções em Markdown (e o conteúdo deve estar em Português):
 
-1.  **Persona:** Define a clear and relevant role for the AI to adopt (e.g., "Assuma o papel de um copywriter sênior especializado em marketing de tecnologia B2B.").
-2.  **Contexto:** Elaborate on the user's initial description. Add essential background details, target audience, and any relevant information that would help the AI better understand the scenario. Make reasonable assumptions if necessary.
-3.  **Tarefa:** Provide a clear, step-by-step description of the task the AI needs to perform. Be explicit and unambiguous.
-4.  **Formato de Saída:** Specify the output format with extreme clarity. Don't just say "uma lista"; instead, define the structure precisely. For example: "Retorne a resposta como um objeto JSON com as chaves 'titulo' (string) e 'pontos_chave' (array de strings)." or "Formate a saída em Markdown, com um título H2 e uma lista numerada."
-5.  **Exemplos:** This is crucial. Provide at least one concrete 'few-shot' example, showing a sample input and the corresponding desired output. This will guide the AI on the expected quality and structure.
-6.  **Restrições:** List any constraints or things the AI should avoid (e.g., "Não use linguagem excessivamente formal.", "Limite a resposta a 200 palavras.").
+1.  **Persona:** Defina um papel claro e relevante para a IA adotar (ex: "Assuma o papel de um copywriter sênior especializado em marketing de tecnologia B2B.").
+2.  **Contexto:** Elabore sobre a descrição inicial do usuário. Adicione detalhes de fundo essenciais, público-alvo e qualquer informação relevante. Faça suposições razoáveis se necessário.
+3.  **Tarefa:** Forneça uma descrição passo a passo clara da tarefa que a IA precisa realizar. Seja explícito.
+4.  **Formato de Saída:** Especifique o formato de saída com extrema clareza. Não diga apenas "uma lista"; em vez disso, defina a estrutura. Ex: "Retorne a resposta como um objeto JSON..." ou "Formate a saída em Markdown...".
+5.  **Exemplos:** Isso é crucial. Forneça pelo menos um exemplo concreto 'few-shot', mostrando uma entrada de amostra e a saída desejada correspondente.
+6.  **Restrições:** Liste quaisquer restrições ou coisas que a IA deve evitar (ex: "Não use linguagem excessivamente formal.", "Limite a resposta a 200 palavras.").
 
-Your final output should be ONLY the generated prompt, ready to be copied and pasted by the user.`;
+Sua saída final deve ser APENAS o prompt gerado (em português), pronto para ser copiado e colado pelo usuário.`;
 
-        const userPrompt = `Here is my goal: "${description}"
+        const userPrompt = `Aqui está o meu objetivo: "${description}"
 
-Please generate an optimized prompt for me.`;
+Por favor, gere um prompt otimizado para mim.`;
         
         const response = await ai.models.generateContent({
             model: "gemini-3-pro-preview",
             contents: userPrompt,
             config: {
                 systemInstruction: systemInstruction,
+                thinkingConfig: { thinkingBudget: 1024 } // Habilita raciocínio para melhor estruturação do prompt
             },
         });
 
@@ -147,7 +148,7 @@ export const generatePRD = async ({ title, description, industry, targetAudience
         const ai = getAiClient();
 
         const systemInstruction = `Você é um Gerente de Produto Sênior de classe mundial, especialista em criar Documentos de Requisitos de Produto (PRDs) claros, abrangentes e acionáveis. Sua tarefa é pegar a ideia de um produto e transformá-la em um PRD profissional e completo, seguindo as melhores práticas da indústria.
-Sempre utilize formatação Markdown para estruturar o documento. Use cabeçalhos (#, ##), listas com marcadores (*), e negrito (**) para destacar informações importantes e garantir a legibilidade. O documento final deve ser bem organizado e pronto para ser compartilhado com uma equipe de desenvolvimento e stakeholders.`;
+Sempre utilize formatação Markdown para estruturar o documento. Use cabeçalhos (#, ##), listas com marcadores (*), e negrito (**) para destacar informações importantes e garantir a legibilidade. O documento final deve ser bem organizado e pronto para ser compartilhado com uma equipe de desenvolvimento e stakeholders. O idioma do documento deve ser Português.`;
 
         const userPrompt = `
         Gere um PRD completo e detalhado para o seguinte produto:
@@ -189,6 +190,7 @@ Sempre utilize formatação Markdown para estruturar o documento. Use cabeçalho
             contents: userPrompt,
             config: {
                 systemInstruction: systemInstruction,
+                thinkingConfig: { thinkingBudget: 4096 } // Alto budget de pensamento para garantir profundidade no PRD
             },
         });
 
@@ -209,11 +211,11 @@ const analysisSchema = {
         },
         justification: {
             type: Type.STRING,
-            description: "A brief explanation for the given score."
+            description: "A brief explanation for the given score in Portuguese."
         },
         suggestions: {
             type: Type.ARRAY,
-            description: "A list of actionable suggestions for improving the prompt.",
+            description: "A list of actionable suggestions for improving the prompt in Portuguese.",
             items: { type: Type.STRING }
         }
     },
@@ -224,19 +226,19 @@ export const analyzeAndRefinePrompt = async (promptToAnalyze: string): Promise<P
      try {
         const ai = getAiClient();
 
-        const systemInstruction = `You are a world-class Prompt Engineering expert. Your task is to analyze a user-submitted prompt for a large language model (LLM) and provide structured, actionable feedback.
-Evaluate the prompt based on the following criteria:
-- **Clarity and Specificity:** Is the task well-defined?
-- **Context:** Is there enough background information for the LLM to succeed?
-- **Persona:** Is the role for the AI clearly defined?
-- **Format Definition:** Is the desired output format specified?
-- **Constraint Definition:** Are there clear rules or boundaries?
+        const systemInstruction = `Você é um especialista em Engenharia de Prompt de classe mundial. Sua tarefa é analisar um prompt enviado pelo usuário para um grande modelo de linguagem (LLM) e fornecer feedback estruturado e acionável em PORTUGUÊS.
+Avalie o prompt com base nos seguintes critérios:
+- **Clareza e Especificidade:** A tarefa está bem definida?
+- **Contexto:** Há informações de fundo suficientes para o LLM ter sucesso?
+- **Persona:** O papel da IA está claramente definido?
+- **Definição de Formato:** O formato de saída desejado está especificado?
+- **Definição de Restrições:** Existem regras ou limites claros?
 
-Based on your analysis, provide a score, a justification for the score, and a list of suggestions for improvement.`;
+Com base em sua análise, forneça uma pontuação, uma justificativa para a pontuação e uma lista de sugestões de melhoria.`;
 
-        const userPrompt = `Please analyze the following prompt and provide your feedback in the requested JSON format.
+        const userPrompt = `Por favor, analise o seguinte prompt e forneça seu feedback no formato JSON solicitado (em Português).
 
-**Prompt to Analyze:**
+**Prompt para Analisar:**
 ---
 ${promptToAnalyze}
 ---
@@ -279,42 +281,43 @@ interface AppPromptParams {
 export const generateAppPrompt = async ({ prdContent, promptType, technology, framework, specialRequirements }: AppPromptParams): Promise<string> => {
     try {
         const ai = getAiClient();
-        const systemInstruction = `You are a world-class AI Prompt Engineer specializing in creating prompts for AI-powered code generation and application building tools (like Lovable, v0.dev, etc.). Your task is to convert a detailed Product Requirements Document (PRD) and user specifications into a comprehensive, actionable, and highly-detailed prompt. The generated prompt should be so clear that an AI tool can use it to build the specified application or landing page with minimal ambiguity.
+        const systemInstruction = `Você é um Engenheiro de Prompt de IA de classe mundial, especializado em criar prompts para ferramentas de geração de código e construção de aplicativos (como Lovable, v0.dev, Cursor, etc.). Sua tarefa é converter um Documento de Requisitos de Produto (PRD) detalhado e especificações do usuário em um prompt abrangente, acionável e altamente detalhado. O prompt gerado deve ser tão claro que uma ferramenta de IA possa usá-lo para construir o aplicativo ou landing page especificado com o mínimo de ambiguidade.
 
-**Key instructions for you:**
-- **Structure:** Always suggest a logical file and component structure.
-- **State Management:** Mention a basic state management strategy (e.g., using React Hooks like useState, useContext).
-- **API Placeholders:** Include comments indicating where API calls should be made.
-- **Accessibility:** Include reminders for ARIA attributes and semantic HTML.
-- **Clarity:** The final prompt must be a single, complete block of text, ready for the user.
+**Instruções principais para você:**
+- **Idioma:** O prompt final DEVE ser gerado em PORTUGUÊS.
+- **Estrutura:** Sempre sugira uma estrutura lógica de arquivos e componentes.
+- **Gerenciamento de Estado:** Mencione uma estratégia básica de gerenciamento de estado (ex: usando React Hooks como useState, useContext).
+- **Placeholders de API:** Inclua comentários indicando onde as chamadas de API devem ser feitas.
+- **Acessibilidade:** Inclua lembretes para atributos ARIA e HTML semântico.
+- **Clareza:** O prompt final deve ser um único bloco de texto completo, pronto para o usuário copiar.
 
-Structure your response as a single, complete prompt. Do not add any conversational text before or after the prompt itself.`;
+Estruture sua resposta como um único prompt completo. Não adicione nenhum texto de conversa antes ou depois do prompt em si.`;
         
         const userPrompt = `
-        Based on the information provided below, please generate a single, highly-detailed prompt for an AI application builder.
+        Com base nas informações fornecidas abaixo, gere um único prompt altamente detalhado para um construtor de aplicativos de IA.
 
         ---
-        **1. Product Requirements Document (PRD) Summary:**
+        **1. Resumo do Documento de Requisitos de Produto (PRD):**
         ${prdContent}
         ---
-        **2. Desired Output Type:**
-        I need a prompt to generate a **${promptType}**.
+        **2. Tipo de Saída Desejada:**
+        Preciso de um prompt para gerar um(a) **${promptType}**.
         ---
-        **3. Technology Stack:**
-        - Primary Frontend Technology: **${technology}**
-        ${framework ? `- Framework/Library: **${framework}**` : ''}
+        **3. Stack Tecnológico:**
+        - Tecnologia Frontend Principal: **${technology}**
+        ${framework ? `- Framework/Biblioteca: **${framework}**` : ''}
         ---
-        **4. Special Requirements:**
+        **4. Requisitos Especiais:**
         ${specialRequirements || "Nenhum requisito especial fornecido. A IA deve inferir os detalhes com base nas melhores práticas para o tipo de aplicação descrito no PRD."}
         ---
 
-        **Prompt Generation Instructions:**
-        - **Be Specific:** Translate abstract PRD requirements into concrete UI/UX details. Define components, layouts, color palettes, typography, and key user flows.
-        - **Component Breakdown:** List the main components needed (e.g., Navbar, HeroSection, ProductCard, LoginForm, DashboardSidebar). For each component, describe its elements, props, and states.
-        - **Functionality:** Clearly describe the expected behavior for interactive elements. Detail client-side logic, state management (e.g., "Use a 'useState' hook to manage the form input"), and where data would be fetched.
-        - **Styling:** Provide clear styling cues (e.g., "Use TailwindCSS for styling," "The primary button should have a background color of #4F46E5.").
-        - **Responsiveness:** Ensure the prompt mentions that the final output must be fully responsive.
-        - **Final Output:** The final text should be the prompt itself, starting with a clear instruction like "Create a new [React/Vue/...] [Application/Landing Page] that..."
+        **Instruções de Geração do Prompt:**
+        - **Seja Específico:** Traduza requisitos abstratos do PRD em detalhes concretos de UI/UX. Defina componentes, layouts, paletas de cores, tipografia e fluxos de usuário principais.
+        - **Detalhamento de Componentes:** Liste os principais componentes necessários (ex: Navbar, HeroSection, ProductCard, LoginForm, DashboardSidebar). Para cada componente, descreva seus elementos, props e estados.
+        - **Funcionalidade:** Descreva claramente o comportamento esperado para elementos interativos. Detalhe a lógica do lado do cliente, gerenciamento de estado e onde os dados seriam buscados.
+        - **Estilização:** Forneça dicas claras de estilo (ex: "Use TailwindCSS para estilização", "O botão principal deve ter a cor de fundo #4F46E5").
+        - **Responsividade:** Garanta que o prompt mencione que a saída final deve ser totalmente responsiva.
+        - **Saída Final:** O texto final deve ser o próprio prompt, em PORTUGUÊS, começando com uma instrução clara como "Crie um(a) novo(a) [Aplicação/Landing Page] em [React/Vue/...] que..."
         `;
 
         const response = await ai.models.generateContent({
@@ -322,6 +325,7 @@ Structure your response as a single, complete prompt. Do not add any conversatio
             contents: userPrompt,
             config: {
                 systemInstruction: systemInstruction,
+                thinkingConfig: { thinkingBudget: 2048 } // Habilita raciocínio para planejar a arquitetura do app
             },
         });
 
@@ -364,9 +368,9 @@ const competitorSchema = {
                 properties: {
                     appName: { type: Type.STRING, description: "The name of the competitor app." },
                     platform: { type: Type.STRING, description: "The platforms it runs on (e.g., 'Web', 'iOS, Android')." },
-                    mainFeatures: { type: Type.STRING, description: "A brief summary of its key features." },
+                    mainFeatures: { type: Type.STRING, description: "A brief summary of its key features in Portuguese." },
                     popularity: { type: Type.STRING, description: "A measure of its popularity (e.g., '4.8/5 (500k+ reviews)')." },
-                    pricingModel: { type: Type.STRING, description: "The pricing model (e.g., 'Freemium', 'Subscription from $9/mo')." },
+                    pricingModel: { type: Type.STRING, description: "The pricing model (e.g., 'Freemium', 'Subscription from $9/mo') in Portuguese." },
                     link: { type: Type.STRING, description: "A direct link to their website." },
                 },
                 required: ["appName", "platform", "mainFeatures", "popularity", "pricingModel", "link"]
@@ -379,10 +383,10 @@ const competitorSchema = {
 export const generateCompetitorAnalysis = async (prdContent: string): Promise<Competitor[]> => {
     try {
         const ai = getAiClient();
-        const systemInstruction = "Você é um analista de pesquisa de mercado sênior, especialista na indústria de tecnologia. Sua tarefa é identificar os principais concorrentes para uma determinada ideia de produto e apresentar os dados em um formato JSON estruturado.";
+        const systemInstruction = "Você é um analista de pesquisa de mercado sênior, especialista na indústria de tecnologia. Sua tarefa é identificar os principais concorrentes para uma determinada ideia de produto e apresentar os dados em um formato JSON estruturado. O conteúdo deve estar em Português.";
 
         const userPrompt = `
-        Com base no Documento de Requisitos de Produto (PRD) a seguir, encontre de 5 a 7 concorrentes diretos ou indiretos. Para cada concorrente, forneça o nome do aplicativo, a plataforma, as principais funcionalidades, uma medida de popularidade (ex: avaliação, número de reviews), o modelo de precificação e um link para o site.
+        Com base no Documento de Requisitos de Produto (PRD) a seguir, encontre de 5 a 7 concorrentes diretos ou indiretos. Para cada concorrente, forneça o nome do aplicativo, a plataforma, as principais funcionalidades (em português), uma medida de popularidade (ex: avaliação, número de reviews), o modelo de precificação (em português) e um link para o site.
 
         **PRD:**
         ---
@@ -393,7 +397,7 @@ export const generateCompetitorAnalysis = async (prdContent: string): Promise<Co
         `;
 
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3-pro-preview",
             contents: userPrompt,
             config: {
                 systemInstruction,
@@ -421,7 +425,7 @@ export const generateCompetitorAnalysis = async (prdContent: string): Promise<Co
 export const generateUIInterfaces = async (prdContent: string): Promise<string> => {
     try {
         const ai = getAiClient();
-        const systemInstruction = "Você é um designer de UI/UX e estrategista de produtos de classe mundial. Sua tarefa é conceituar e descrever a interface do usuário para um aplicativo com base em seu Documento de Requisitos de Produto (PRD). Sua saída deve ser clara, estruturada e fornecer uma direção de design acionável. Use Markdown para formatação.";
+        const systemInstruction = "Você é um designer de UI/UX e estrategista de produtos de classe mundial. Sua tarefa é conceituar e descrever a interface do usuário para um aplicativo com base em seu Documento de Requisitos de Produto (PRD). Sua saída deve ser clara, estruturada, em Português e fornecer uma direção de design acionável. Use Markdown para formatação.";
 
         const userPrompt = `
         Com base no seguinte Documento de Requisitos de Produto (PRD), gere uma descrição detalhada da Interface do Usuário (UI) e da Experiência do Usuário (UX).
@@ -431,7 +435,7 @@ export const generateUIInterfaces = async (prdContent: string): Promise<string> 
         ${prdContent}
         ---
 
-        Por favor, estruture sua resposta em Markdown com as seguintes seções:
+        Por favor, estruture sua resposta em Markdown (em Português) com as seguintes seções:
 
         1.  **🎨 Filosofia de Design Geral & Guia de Estilo:**
             *   **Aparência e Sensação (Look & Feel):** Descreva a estética geral (ex: "Limpo e profissional", "Moderno e divertido", "Orientado a dados e minimalista").
@@ -459,6 +463,7 @@ export const generateUIInterfaces = async (prdContent: string): Promise<string> 
             contents: userPrompt,
             config: {
                 systemInstruction,
+                thinkingConfig: { thinkingBudget: 2048 } // Habilita raciocínio para UX design
             },
         });
 
@@ -476,7 +481,7 @@ export const generateDbSchemaFromPrd = async (prdContent: string): Promise<Schem
 
         const prompt = `
             Baseado no seguinte Documento de Requisitos de Produto (PRD), gere um schema de banco de dados SQL detalhado.
-            O schema deve ser bem estruturado, seguir as melhores práticas e incluir tabelas, colunas com tipos de dados apropriados e descrições breves para cada tabela e coluna.
+            O schema deve ser bem estruturado, seguir as melhores práticas e incluir tabelas, colunas com tipos de dados apropriados e descrições breves (em Português) para cada tabela e coluna.
             Certifique-se de que chaves primárias (como 'id') e chaves estrangeiras (como 'user_id') sejam incluídas onde for relevante.
 
             PRD: "${prdContent}"
@@ -485,7 +490,7 @@ export const generateDbSchemaFromPrd = async (prdContent: string): Promise<Schem
         `;
 
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3-pro-preview",
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
@@ -515,34 +520,44 @@ export const generateLogoImages = async (prdContent: string): Promise<string[]> 
         const generatedImages: string[] = [];
         
         // Generate 3 distinct logo concepts by making separate calls
+        // Using gemini-3-pro-image-preview for highest quality logos
         for (let i = 0; i < 3; i++) {
              const userPrompt = `
-                Based on the following Product Requirements Document (PRD), generate a unique and professional logo concept.
+                Based on the following Product Requirements Document (PRD), generate a unique, high-quality professional logo concept.
                 This is for concept variation #${i + 1} of 3.
                 **PRD:**
                 ---
                 ${prdContent}
                 ---
-                The logo should be a clean, vector-style, minimalist icon suitable for a tech company, presented on a plain white background.
+                The logo should be a modern, vector-style, minimalist icon suitable for a tech company or app.
+                Ensure the background is solid white.
+                Focus on clean lines and memorability.
             `;
             const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash-image',
+                model: 'gemini-3-pro-image-preview',
                 contents: {
                     parts: [{ text: userPrompt }],
                 },
                 config: {
-                    responseModalities: [Modality.IMAGE],
+                    // responseMimeType not supported for image models usually, handling raw output
+                    imageConfig: {
+                        aspectRatio: "1:1",
+                        imageSize: "1K"
+                    }
                 },
             });
             
             let foundImage = false;
-            for (const part of response.candidates[0].content.parts) {
-                if (part.inlineData && part.inlineData.data) {
-                    generatedImages.push(part.inlineData.data);
-                    foundImage = true;
-                    break; 
+            if (response.candidates && response.candidates[0].content.parts) {
+                for (const part of response.candidates[0].content.parts) {
+                    if (part.inlineData && part.inlineData.data) {
+                        generatedImages.push(part.inlineData.data);
+                        foundImage = true;
+                        break; 
+                    }
                 }
             }
+            
             if (!foundImage) {
                  console.warn(`Image data not found in response for concept ${i + 1}.`);
             }
@@ -561,7 +576,7 @@ export const generateLogoImages = async (prdContent: string): Promise<string[]> 
 export const generatePrdDetails = async (prdContent: string): Promise<string> => {
     try {
         const ai = getAiClient();
-        const systemInstruction = `Você é um Gerente de Produto Sênior e Arquiteto de Software. Sua tarefa é analisar um PRD e gerar um resumo estratégico e técnico conciso e acionável. Formate a saída usando Markdown.`;
+        const systemInstruction = `Você é um Gerente de Produto Sênior e Arquiteto de Software. Sua tarefa é analisar um PRD e gerar um resumo estratégico e técnico conciso e acionável em Português. Formate a saída usando Markdown.`;
 
         const userPrompt = `
         Com base no seguinte Documento de Requisitos de Produto (PRD), gere uma análise detalhada com as seguintes seções:
@@ -594,6 +609,7 @@ export const generatePrdDetails = async (prdContent: string): Promise<string> =>
             contents: userPrompt,
             config: {
                 systemInstruction,
+                thinkingConfig: { thinkingBudget: 1024 } // Habilita raciocínio para análise estratégica
             },
         });
 
@@ -608,7 +624,7 @@ export const generatePrdDetails = async (prdContent: string): Promise<string> =>
 export const generateUiFlowchart = async (prdContent: string): Promise<string> => {
     try {
         const ai = getAiClient();
-        const systemInstruction = `Você é um designer de UX sênior especializado em modelagem de fluxo de usuário. Sua tarefa é analisar um Documento de Requisitos de Produto (PRD) e gerar um diagrama de fluxo de usuário detalhado usando a sintaxe Mermaid.js (graph TD). O fluxograma deve representar a jornada do usuário através do aplicativo, incluindo telas, ações e decisões.`;
+        const systemInstruction = `Você é um designer de UX sênior especializado em modelagem de fluxo de usuário. Sua tarefa é analisar um Documento de Requisitos de Produto (PRD) e gerar um diagrama de fluxo de usuário detalhado usando a sintaxe Mermaid.js (graph TD). O fluxograma deve representar a jornada do usuário através do aplicativo, incluindo telas, ações e decisões. As descrições dos nós devem estar em Português.`;
 
         const userPrompt = `
         Com base no seguinte Documento de Requisitos de Produto (PRD), crie um fluxograma de usuário usando a sintaxe Mermaid.js.
@@ -635,6 +651,9 @@ export const generateUiFlowchart = async (prdContent: string): Promise<string> =
             contents: userPrompt,
             config: {
                 systemInstruction,
+                // Thinking config can be risky for strict code generation if it leaks into output, 
+                // but Mermaid is robust enough usually. Keeping it off for strict syntax safety or low budget.
+                thinkingConfig: { thinkingBudget: 1024 }
             },
         });
 

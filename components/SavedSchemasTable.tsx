@@ -5,9 +5,10 @@ import { DeleteIcon, EditIcon } from './icons';
 
 interface SavedSchemasTableProps {
     schemas: SavedSchema[];
+    onDelete?: (id: number) => void;
 }
 
-export const SavedSchemasTable: React.FC<SavedSchemasTableProps> = ({ schemas }) => {
+export const SavedSchemasTable: React.FC<SavedSchemasTableProps> = ({ schemas, onDelete }) => {
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col h-full">
             <div className="p-4 border-b border-gray-200 flex justify-between items-center">
@@ -54,7 +55,10 @@ export const SavedSchemasTable: React.FC<SavedSchemasTableProps> = ({ schemas })
                                         <button className="text-indigo-600 hover:text-indigo-900 p-1">
                                             <EditIcon className="h-4 w-4" />
                                         </button>
-                                        <button className="text-red-600 hover:text-red-900 p-1 ml-2">
+                                        <button 
+                                            className="text-red-600 hover:text-red-900 p-1 ml-2"
+                                            onClick={() => onDelete && onDelete(schema.id)}
+                                        >
                                             <DeleteIcon className="h-4 w-4" />
                                         </button>
                                     </td>
@@ -67,4 +71,3 @@ export const SavedSchemasTable: React.FC<SavedSchemasTableProps> = ({ schemas })
         </div>
     );
 };
-   

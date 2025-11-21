@@ -1,11 +1,12 @@
 
 import React from 'react';
 import type { SchemaTable } from '../types';
-import { StorageIcon } from './icons';
+import { StorageIcon, ArrowDownTrayIcon } from './icons';
 
 interface SchemaDisplayProps {
     schema: SchemaTable[] | null;
     isLoading: boolean;
+    onSave?: () => void;
 }
 
 const Placeholder: React.FC = () => (
@@ -28,7 +29,7 @@ const Loader: React.FC = () => (
     </div>
 );
 
-export const SchemaDisplay: React.FC<SchemaDisplayProps> = ({ schema, isLoading }) => {
+export const SchemaDisplay: React.FC<SchemaDisplayProps> = ({ schema, isLoading, onSave }) => {
     if (isLoading) {
         return (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col items-center justify-center h-full">
@@ -47,8 +48,17 @@ export const SchemaDisplay: React.FC<SchemaDisplayProps> = ({ schema, isLoading 
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col h-full">
-            <div className="p-4 border-b border-gray-200">
+            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
                 <h3 className="font-semibold text-gray-800">Diagrama de Banco de Dados</h3>
+                {onSave && (
+                    <button 
+                        onClick={onSave}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500"
+                    >
+                        <ArrowDownTrayIcon className="w-4 h-4" />
+                        Salvar Schema
+                    </button>
+                )}
             </div>
             <div className="flex-1 p-4 overflow-y-auto space-y-4">
                 {schema.map((table, tableIndex) => (
@@ -76,4 +86,3 @@ export const SchemaDisplay: React.FC<SchemaDisplayProps> = ({ schema, isLoading 
         </div>
     );
 };
-   

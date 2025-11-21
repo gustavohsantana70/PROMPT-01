@@ -5,7 +5,7 @@ import { SchemaDisplay } from './components/SchemaDisplay';
 import { SavedSchemasTable } from './components/SavedSchemasTable';
 import { MOCK_SCHEMAS, MOCK_DOCUMENTS, MOCK_USER } from './constants';
 import { generateDatabaseSchema } from './services/geminiService';
-import type { ChatMessage, SchemaTable, GeneratedPrompt, Document, User } from './types';
+import type { ChatMessage, SchemaTable, GeneratedPrompt, Document, User, SavedSchema } from './types';
 import { AddIcon, PromptEngineIcon, MailIcon, LockClosedIcon, GoogleIcon } from './components/icons';
 import { PromptGenerator } from './components/PromptGenerator';
 import { Dashboard } from './components/Dashboard';
@@ -30,6 +30,9 @@ const MainApp: React.FC<{ user: User; onLogout: () => void; theme: Theme; setThe
     { from: 'ia', text: "Olá! Descreva a aplicação que você deseja criar, e eu gerarei um diagrama de banco de dados para você." }
   ]);
   const [error, setError] = useState<string | null>(null);
+
+  // State for Saved Schemas
+  const [savedSchemas, setSavedSchemas] = useState<SavedSchema[]>(MOCK_SCHEMAS);
 
   // State for My Documents
   const [savedDocuments, setSavedDocuments] = useState<Document[]>(MOCK_DOCUMENTS);
@@ -80,10 +83,40 @@ const MainApp: React.FC<{ user: User; onLogout: () => void; theme: Theme; setThe
         // Add the new prompt document itself to the list
         return [newDoc, ...updatedDocs];
     });
-};
+  };
 
   const handleDeleteDocument = (id: string) => {
     setSavedDocuments(prev => prev.filter(doc => doc.id !== id));
+  };
+
+  // --- Logic to Save Schema ---
+  const handleSaveSchema = () => {
+    if (!schema) return;
+
+    // Get default title from the last user message or generic
+    const lastUserMsg = [...messages].reverse().find(m => m.from === 'user');
+    const defaultDesc = lastUserMsg ? lastUserMsg.text : 'Schema gerado por IA';
+    
+    const title = window.prompt("Dê um nome para este Schema de Banco de Dados:", "Novo Schema");
+    
+    if (title) {
+        const newSchema: SavedSchema = {
+            id: Date.now(),
+            title: title,
+            desc: defaultDesc.length > 60 ? defaultDesc.substring(0, 60) + '...' : defaultDesc,
+            tables: schema.length,
+            chatMsgs: messages.length,
+            date: new Intl.DateTimeFormat('pt-BR').format(new Date()),
+        };
+        setSavedSchemas(prev => [newSchema, ...prev]);
+        alert('Schema salvo com sucesso!');
+    }
+  };
+
+  const handleDeleteSchema = (id: number) => {
+      if (confirm('Tem certeza que deseja excluir este schema?')) {
+          setSavedSchemas(prev => prev.filter(s => s.id !== id));
+      }
   };
 
 
@@ -188,11 +221,12 @@ const MainApp: React.FC<{ user: User; onLogout: () => void; theme: Theme; setThe
     schema: SchemaTable[] | null;
     messages: ChatMessage[];
     onSendMessage: (msg: string) => void;
+    onSave: () => void;
     isLoading: boolean;
-  }> = ({ schema, messages, onSendMessage, isLoading }) => (
+  }> = ({ schema, messages, onSendMessage, onSave, isLoading }) => (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-16rem)]">
       <div className="lg:col-span-1 h-full">
-        <SchemaDisplay schema={schema} isLoading={isLoading} />
+        <SchemaDisplay schema={schema} isLoading={isLoading} onSave={onSave} />
       </div>
       <div className="lg:col-span-1 h-full">
         <ChatPanel messages={messages} onSendMessage={onSendMessage} isLoading={isLoading} />
@@ -245,11 +279,11 @@ const MainApp: React.FC<{ user: User; onLogout: () => void; theme: Theme; setThe
             {(!schema && !isLoading && !error) ? (
               <InitialView onSendMessage={handleSendMessage} isLoading={isLoading} />
             ) : (
-              <ResultsView schema={schema} messages={messages} onSendMessage={handleSendMessage} isLoading={isLoading} />
+              <ResultsView schema={schema} messages={messages} onSendMessage={handleSendMessage} onSave={handleSaveSchema} isLoading={isLoading} />
             )}
             
             <div className="mt-6">
-               <SavedSchemasTable schemas={MOCK_SCHEMAS} />
+               <SavedSchemasTable schemas={savedSchemas} onDelete={handleDeleteSchema} />
             </div>
           </div>
         );
